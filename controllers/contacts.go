@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/memclutter/gontacts/components"
 	"github.com/memclutter/gontacts/models"
 	"github.com/memclutter/gontacts/services"
 	"gopkg.in/mgo.v2/bson"
@@ -20,7 +21,11 @@ func NewContacts() *Contacts {
 }
 
 func (c *Contacts) Index(ctx *gin.Context) {
-	if model, totalCount, err := c.service.All(); err != nil {
+	var pagination components.Pagination
+
+	ctx.ShouldBindQuery(&pagination)
+
+	if model, totalCount, err := c.service.All(pagination.Offset, pagination.Limit, pagination.Order); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal server error",
 		})
@@ -66,27 +71,27 @@ func (c *Contacts) Show(ctx *gin.Context) {
 	}
 }
 
-func (c *Contacts) PartialUpdate(ctx *gin.Context) {
-	var model models.Contact
-
-	if !bson.IsObjectIdHex(ctx.Param("id")) {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"message": "Page not found",
-		})
-	} else {
-		id := bson.ObjectIdHex(ctx.Param("id"))
-
-		ctx.ShouldBind(&model)
-
-		if err := c.service.PartialUpdate(id, &model); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-		} else {
-			ctx.JSON(http.StatusOK, model)
-		}
-	}
-}
+//func (c *Contacts) PartialUpdate(ctx *gin.Context) {
+//	var model models.Contact
+//
+//	if !bson.IsObjectIdHex(ctx.Param("id")) {
+//		ctx.JSON(http.StatusNotFound, gin.H{
+//			"message": "Page not found",
+//		})
+//	} else {
+//		id := bson.ObjectIdHex(ctx.Param("id"))
+//
+//		ctx.ShouldBind(&model)
+//
+//		if err := c.service.PartialUpdate(id, &model); err != nil {
+//			ctx.JSON(http.StatusInternalServerError, gin.H{
+//				"message": err.Error(),
+//			})
+//		} else {
+//			ctx.JSON(http.StatusOK, model)
+//		}
+//	}
+//}
 
 func (c *Contacts) Update(ctx *gin.Context) {
 	var model models.Contact
