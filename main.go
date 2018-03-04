@@ -19,14 +19,16 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.GET("/", controllers.Index)
+	app := controllers.NewApp()
 
-	contacts := &controllers.Contacts{}
+	router.GET("/", app.Status)
+
+	contacts := controllers.NewContacts()
 
 	router.GET("/contacts", contacts.Index)
 	router.POST("/contacts", contacts.Create)
 	router.GET("/contacts/:id", contacts.Show)
-	router.PATCH("/contacts/:id", contacts.Patch)
+	router.PATCH("/contacts/:id", contacts.PartialUpdate)
 	router.PUT("/contacts/:id", contacts.Update)
 	router.DELETE("/contacts/:id", contacts.Destroy)
 

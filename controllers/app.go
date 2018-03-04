@@ -1,14 +1,23 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/memclutter/gontacts/services"
 )
 
-func Index(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": "ok",
-		"time": time.Now().UTC(),
-	})
+type App struct {
+	service *services.App
+}
+
+func NewApp() *App {
+	return &App{
+		service: services.NewApp(),
+	}
+}
+
+func (c *App) Status(ctx *gin.Context) {
+	model := c.service.GetStatus()
+	ctx.JSON(http.StatusOK, model)
 }
