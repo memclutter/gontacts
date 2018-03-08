@@ -5,5 +5,17 @@ services:
     image: mongo
     container_name: gontacts-mongo
     restart: always
+
+  gin:
+    build: .
+    container_name: gontacts-gin
+    restart: always
     ports:
-      - "27017:27017"
+      - "8000:8000"
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    environment:
+      - "MONGO_URL=mongodb://mongo:27017/gontactss"
+      - "ADDR=0.0.0.0:8000"

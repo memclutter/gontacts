@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/memclutter/gontacts/components"
 	"github.com/memclutter/gontacts/controllers"
+	"github.com/memclutter/gontacts/utils"
 )
 
 var (
@@ -14,8 +15,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", ":8000", "Set address")
-	flag.StringVar(&mongoUrl, "mongoUrl", "mongodb://localhost:27017/contacts", "MongoDB connection url")
+	utils.FlagStringVarEnv(&addr, "addr", ":8000", "Set address", "ADDR")
+	utils.FlagStringVarEnv(&mongoUrl, "mongoUrl", "mongodb://localhost:27017/gontacts", "MongoDB connection url", "MONGO_URL")
 	flag.Parse()
 }
 
