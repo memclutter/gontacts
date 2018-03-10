@@ -19,3 +19,5 @@ services:
     environment:
       - "MONGO_URL=mongodb://mongo:27017/gontactss"
       - "ADDR=0.0.0.0:8000"
+    env_file:
+      - ".env"
