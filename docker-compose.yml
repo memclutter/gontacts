@@ -18,6 +18,7 @@ services:
       - mongo
     environment:
       - "MONGO_URL=mongodb://mongo:27017/gontactss"
+      - "GIN_MODE=release"
       - "ADDR=0.0.0.0:8000"
     env_file:
       - ".env"
