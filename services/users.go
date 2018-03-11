@@ -6,6 +6,7 @@ import (
 	"github.com/memclutter/gontacts/components"
 	"github.com/memclutter/gontacts/models"
 	"github.com/memclutter/gontacts/utils"
+	"github.com/pkg/errors"
 	"gopkg.in/gomail.v2"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -74,4 +75,21 @@ func (s *Users) Confirmation(token string) error {
 	}
 
 	return s.collection.UpdateId(model.Id, updateQuery)
+}
+
+func (s *Users) Login(model *models.Login) (string, error) {
+	var userModel models.User
+
+	findQuery := bson.M{
+		"email":        model.Email,
+		"is_confirmed": true,
+	}
+
+	if err := s.collection.Find(findQuery).One(&userModel); err != nil {
+		return "", err
+	} else if !utils.CheckPasswordHash(model.Password, userModel.PasswordHash) {
+		return "", errors.New("Password mismatch")
+	} else {
+		return utils.CreateJwtToken(userModel.Id, userModel.Email), nil
+	}
 }

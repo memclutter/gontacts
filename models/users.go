@@ -9,3 +9,8 @@ type User struct {
 	IsConfirmed       bool          `bson:"is_confirmed" json:"-"`
 	ConfirmationToken string        `bson:"confirmation_token" json:"-"`
 }
+
+type Login struct {
+	Email    string `form:"email" binding:"required"`
+	Password string `form:"password" binding:"required"`
+}

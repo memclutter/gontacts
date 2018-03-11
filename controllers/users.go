@@ -39,7 +39,21 @@ func (c *Users) Registration(ctx *gin.Context) {
 }
 
 func (c *Users) Login(ctx *gin.Context) {
+	var model models.Login
 
+	if err := ctx.ShouldBind(&model); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+	} else if token, err := c.service.Login(&model); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusCreated, gin.H{
+			"token": token,
+		})
+	}
 }
 
 func (c *Users) Confirmation(ctx *gin.Context) {

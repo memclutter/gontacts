@@ -8,7 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/memclutter/gontacts/components"
 	"github.com/memclutter/gontacts/controllers"
+	"github.com/memclutter/gontacts/middlewares"
 	"github.com/memclutter/gontacts/utils"
+	"github.com/pkg/profile"
 )
 
 var (
@@ -32,6 +34,10 @@ func init() {
 }
 
 func main() {
+	if gin.IsDebugging() {
+		defer profile.Start().Stop()
+	}
+
 	components.MongoInit(mongoUrl)
 	defer components.MongoClose()
 
@@ -40,6 +46,7 @@ func main() {
 	defer close(components.MailerCh)
 
 	router := gin.Default()
+	authorization := middlewares.Authorization()
 
 	app := controllers.NewApp()
 
@@ -47,19 +54,19 @@ func main() {
 
 	users := controllers.NewUsers()
 
-	router.GET("/users/info", users.Info)
+	router.GET("/users/info", authorization, users.Info)
 	router.POST("/users/registration", users.Registration)
 	router.POST("/users/login", users.Login)
 	router.POST("/users/confirmation", users.Confirmation)
 
 	contacts := controllers.NewContacts()
 
-	router.GET("/contacts", contacts.Index)
-	router.POST("/contacts", contacts.Create)
-	router.GET("/contacts/:id", contacts.Show)
+	router.GET("/contacts", authorization, contacts.Index)
+	router.POST("/contacts", authorization, contacts.Create)
+	router.GET("/contacts/:id", authorization, contacts.Show)
 	//router.PATCH("/contacts/:id", contacts.PartialUpdate)
-	router.PUT("/contacts/:id", contacts.Update)
-	router.DELETE("/contacts/:id", contacts.Destroy)
+	router.PUT("/contacts/:id", authorization, contacts.Update)
+	router.DELETE("/contacts/:id", authorization, contacts.Destroy)
 
 	router.Run(addr)
 }
