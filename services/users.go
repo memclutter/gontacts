@@ -93,3 +93,8 @@ func (s *Users) Login(model *models.Login) (string, error) {
 		return utils.CreateJwtToken(userModel.Id, userModel.Email), nil
 	}
 }
+
+func (s *Users) Get(id bson.ObjectId) (one *models.User, err error) {
+	err = s.collection.FindId(id).One(&one)
+	return
+}

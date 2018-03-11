@@ -3,9 +3,11 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/memclutter/gontacts/models"
 	"github.com/memclutter/gontacts/services"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Users struct {
@@ -19,7 +21,21 @@ func NewUsers() *Users {
 }
 
 func (c *Users) Info(ctx *gin.Context) {
-
+	if claims, ok := ctx.Get("claims"); !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+	} else if userId := claims.(jwt.MapClaims)["aud"]; !bson.IsObjectIdHex(userId.(string)) {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+	} else if user, err := c.service.Get(bson.ObjectIdHex(userId.(string))); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+	} else {
+		ctx.JSON(http.StatusOK, user)
+	}
 }
 
 func (c *Users) Registration(ctx *gin.Context) {
