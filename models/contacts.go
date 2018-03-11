@@ -6,6 +6,7 @@ import (
 
 type Contact struct {
 	Id       bson.ObjectId `bson:"_id" json:"id"`
+	UserId   bson.ObjectId `bson:"user_id" json:"-"`
 	FullName string        `bson:"full_name" json:"full_name" form:"full_name" binding:"required"`
 	Phone    string        `bson:"phone" json:"phone" form:"phone" binding:"required"`
 	Email    string        `bson:"email,omitempty" json:"email,omitempty" form:"email"`

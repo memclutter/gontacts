@@ -9,24 +9,17 @@ import (
 
 type Contacts struct {
 	collection *mgo.Collection
-	storage    []models.Contact
+	userId     bson.ObjectId
 }
 
 func NewContacts() *Contacts {
 	return &Contacts{
 		collection: components.MongoDB.C("contacts"),
-		storage: []models.Contact{
-			{
-				Id:       bson.NewObjectId(),
-				FullName: "John Doe",
-				Email:    "john.doe@example.com",
-				Phone:    "+112323232",
-				Address:  "23, Perfect street, NY",
-				Skype:    "john.doe",
-				Telegram: "@john.doe",
-			},
-		},
 	}
+}
+
+func (s *Contacts) SetUserId(id bson.ObjectId) {
+	s.userId = id
 }
 
 func (s *Contacts) All(skip, limit int, order string) ([]models.Contact, int, error) {
@@ -34,7 +27,7 @@ func (s *Contacts) All(skip, limit int, order string) ([]models.Contact, int, er
 
 	all := make([]models.Contact, 0)
 	totalCount := 0
-	where := bson.M{}
+	where := bson.M{"user_id": s.userId}
 	query := s.collection.Find(where)
 
 	if totalCount, err = query.Count(); err != nil {
@@ -48,11 +41,16 @@ func (s *Contacts) All(skip, limit int, order string) ([]models.Contact, int, er
 
 func (s *Contacts) Create(model *models.Contact) error {
 	model.Id = bson.NewObjectId()
+	model.UserId = s.userId
 	return s.collection.Insert(model)
 }
 
 func (s *Contacts) Get(id bson.ObjectId) (one *models.Contact, err error) {
-	err = s.collection.FindId(id).One(&one)
+	where := bson.M{
+		"_id":     id,
+		"user_id": s.userId,
+	}
+	err = s.collection.Find(where).One(&one)
 	return
 }
 
@@ -88,9 +86,17 @@ func (s *Contacts) Get(id bson.ObjectId) (one *models.Contact, err error) {
 
 func (s *Contacts) Update(id bson.ObjectId, model *models.Contact) error {
 	model.Id = id
-	return s.collection.UpdateId(id, model)
+	where := bson.M{
+		"_id":     id,
+		"user_id": s.userId,
+	}
+	return s.collection.Update(where, model)
 }
 
 func (s *Contacts) Destroy(id bson.ObjectId) error {
-	return s.collection.RemoveId(id)
+	where := bson.M{
+		"_id":     id,
+		"user_id": s.userId,
+	}
+	return s.collection.Remove(where)
 }

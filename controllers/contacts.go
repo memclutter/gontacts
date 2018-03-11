@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/memclutter/gontacts/components"
 	"github.com/memclutter/gontacts/models"
@@ -25,6 +26,9 @@ func (c *Contacts) Index(ctx *gin.Context) {
 
 	ctx.ShouldBindQuery(&pagination)
 
+	userId := bson.ObjectIdHex(ctx.MustGet("claims").(jwt.MapClaims)["aud"].(string))
+	c.service.SetUserId(userId)
+
 	if model, totalCount, err := c.service.All(pagination.Offset, pagination.Limit, pagination.Order); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal server error",
@@ -40,6 +44,9 @@ func (c *Contacts) Index(ctx *gin.Context) {
 func (c *Contacts) Create(ctx *gin.Context) {
 	var model models.Contact
 
+	userId := bson.ObjectIdHex(ctx.MustGet("claims").(jwt.MapClaims)["aud"].(string))
+	c.service.SetUserId(userId)
+
 	if err := ctx.ShouldBind(&model); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -54,6 +61,9 @@ func (c *Contacts) Create(ctx *gin.Context) {
 }
 
 func (c *Contacts) Show(ctx *gin.Context) {
+	userId := bson.ObjectIdHex(ctx.MustGet("claims").(jwt.MapClaims)["aud"].(string))
+	c.service.SetUserId(userId)
+
 	if !bson.IsObjectIdHex(ctx.Param("id")) {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Page not found",
@@ -96,6 +106,9 @@ func (c *Contacts) Show(ctx *gin.Context) {
 func (c *Contacts) Update(ctx *gin.Context) {
 	var model models.Contact
 
+	userId := bson.ObjectIdHex(ctx.MustGet("claims").(jwt.MapClaims)["aud"].(string))
+	c.service.SetUserId(userId)
+
 	if !bson.IsObjectIdHex(ctx.Param("id")) {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Page not found",
@@ -118,6 +131,10 @@ func (c *Contacts) Update(ctx *gin.Context) {
 }
 
 func (c *Contacts) Destroy(ctx *gin.Context) {
+
+	userId := bson.ObjectIdHex(ctx.MustGet("claims").(jwt.MapClaims)["aud"].(string))
+	c.service.SetUserId(userId)
+
 	if !bson.IsObjectIdHex(ctx.Param("id")) {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Page not found",
